@@ -113,6 +113,7 @@ function GameGrid(_width, _height) constructor {
 			}
 			// Move chosen gem.
 			else {
+				audio_play_sound(asset_get_index("snd_gem_" + string(grid[chosen.x][chosen.y].type)), 1, false);
 				self.replaceGem(chosen, clicked);
 				chosen = false;
 			}
@@ -128,21 +129,46 @@ function GameGrid(_width, _height) constructor {
 	 */
 	static destroyGems = function() {
 		var result = false;
+		var toDestroy = [];
+		var current;
+		var k;
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
 				if (self.cellExistsAndIsNotEmpty(new Coordinate(i, j))) {
-					var current = grid[i][j].type;
-					var k = 1;
+					
+					current = grid[i][j].type;
+					
+					// Horizontal
+					k = 1;
 					while (self.isGemType(new Coordinate(i + k, j), current)) {
 						k++;
 					}
 					if (k >= ROW_SIZE) {
-						result = true;
 						for (var m = 0; m < k; m++) {
-							grid[i + m][j].destroy();
-							grid[i + m][j] = EMPTY_CELL;
+							array_push(toDestroy, new Coordinate(i + m, j));
 						}
 					}
+					
+					// Vertical
+					k = 1;
+					while (self.isGemType(new Coordinate(i, j + k), current)) {
+						k++;
+					}
+					if (k >= ROW_SIZE) {
+						for (var m = 0; m < k; m++) {
+							array_push(toDestroy, new Coordinate(i, j + m));
+						}
+					}
+				}
+			}
+		}
+		
+		if (array_length(toDestroy) > 0) {
+			result = true;
+			for (var i = 0; i < array_length(toDestroy); i++) {
+				if (self.cellExistsAndIsNotEmpty(toDestroy[i])) {
+					grid[toDestroy[i].x][toDestroy[i].y].destroy();
+					grid[toDestroy[i].x][toDestroy[i].y] = EMPTY_CELL;
 				}
 			}
 		}
@@ -258,7 +284,7 @@ function GameGrid(_width, _height) constructor {
 	 * @return int
 	 */
 	static mouse_get_x = function(x) {
-		return floor(x / TILE_SIZE);
+		return floor((x - PADDING) / TILE_SIZE);
 	}
 	
 	/**
@@ -269,7 +295,13 @@ function GameGrid(_width, _height) constructor {
 	 * @return int
 	 */
 	static mouse_get_y = function(y) {
-		return floor(y / TILE_SIZE);
+		return floor((y - PADDING) / TILE_SIZE);
+	}
+	
+	static playSound = function(asset) {
+		if (!audio_is_playing(asset)) {
+			audio_play_sound(asset, 1, false);
+		}
 	}
 
 }
