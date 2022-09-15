@@ -2,20 +2,22 @@
 
 #macro GEM_LAYER "Instances"
 #macro PARTICLE_LAYER "Particles"
-#macro GEM_MAX_TYPE 4
+#macro GEM_MAX_TYPE 8
 #macro TILE_SIZE 16
-#macro FALL_SPEED 2 // Must be (TILE_SIZE mod FALL_SPEED == 0)
+#macro FALL_SPEED 6
 #macro ROW_SIZE 3
 #macro EMPTY_CELL -1
+#macro DEFAULT_CAMERA view_get_camera(0)
 
 #macro PADDING 20
 
-global.game_grid = new GameGrid(10, 10);
+global.game_grid = new GameGrid(1);
 game_grid = global.game_grid;
 game_grid.init();
 
 global.player_active = false;
 global.chosen_gem = false;
+global.score = 0;
 
 
 #region Particles
@@ -27,12 +29,12 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 	var p = part_type_create();
 
 	part_type_shape(p, pt_shape_spark);
-	part_type_life(p, room_speed / 2, room_speed);
+	part_type_life(p, room_speed, room_speed);
 	part_type_alpha2(p, 1, 0);
 	part_type_size(p, 0.2, 0.1, 0.001, 0);
 	part_type_speed(p, 1, 2, 0.001, 0);
 	part_type_direction(p, 0, 360, 0, 0);
-	part_type_gravity(p, 0.2, 270);
+	part_type_gravity(p, 0.1, 270);
 
 	switch (i) {
 		case 1: part_type_color2(p, c_green, c_white);
@@ -43,6 +45,14 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 			break;
 		case 4: part_type_color2(p, c_purple, c_white);
 			break;
+		case 5: part_type_color2(p, c_orange, c_white);
+			break;
+		case 6: part_type_color2(p, c_yellow, c_white);
+			break;
+		case 7: part_type_color2(p, c_silver, c_white);
+			break;
+		case 8: part_type_color2(p, c_white, c_white);
+			break;
 		default: part_type_color2(p, c_yellow, c_white);
 	}
 	
@@ -50,4 +60,3 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 }
 
 #endregion
-

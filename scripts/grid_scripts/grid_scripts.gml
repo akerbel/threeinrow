@@ -1,18 +1,44 @@
-function GameGrid(_width, _height) constructor {
+function GameGrid(complexity) constructor {
 	
 	grid = [];
-	width = _width;
-	height = _height;
+	
+	switch (complexity) {
+		case 1:
+			width = 10;
+			height = 10;
+			gem_types = 4;
+			break;
+		case 2:
+			width = 12;
+			height = 12;
+			gem_types = 6;
+			break;
+		default:
+			width = 14;
+			height = 14;
+			gem_types = 8;
+	}
 
 	/**
 	 * Create grid and fill it with random gems.
+	 * Set camera view regarding grid size.
 	 *
 	 * @return void
 	 */
 	static init = function() {
+		
+		camera_set_view_size(
+			DEFAULT_CAMERA,
+			(PADDING * 2) + (width * TILE_SIZE),
+			(PADDING * 2) + (height * TILE_SIZE),
+		);
+		
+		// @todo rotating camera
+		//camera_set_view_angle(DEFAULT_CAMERA, 90);
+		
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
-				grid[i][j] = new Gem(i, j, irandom_range(1, GEM_MAX_TYPE));
+				grid[i][j] = new Gem(i, j, irandom_range(1, gem_types));
 			}
 		}
 	}
@@ -26,7 +52,7 @@ function GameGrid(_width, _height) constructor {
 		var result = false;
 		for (var i = 0; i < width; i++) {
 			if (self.cellExistsAndIsEmpty(new Coordinate(i, 0))) {
-				grid[i][0] = new Gem(i, 0, irandom_range(1, GEM_MAX_TYPE));
+				grid[i][0] = new Gem(i, 0, irandom_range(1, gem_types));
 				result = true;
 			}
 		}
@@ -98,7 +124,7 @@ function GameGrid(_width, _height) constructor {
 	 * @return void
 	 */
 	static click = function(mouse_x, mouse_y) {
-		var clicked = new Coordinate(self.mouse_get_x(mouse_x), self.mouse_get_y(mouse_y));
+		var clicked = new Coordinate(self.mouseGetX(mouse_x), self.mouseGetY(mouse_y));
 		var chosen = global.chosen_gem;
 		if (self.cellExistsAndIsNotEmpty(clicked)) {
 			// Select gem to move.
@@ -113,8 +139,14 @@ function GameGrid(_width, _height) constructor {
 			}
 			// Move chosen gem.
 			else {
-				audio_play_sound(asset_get_index("snd_gem_" + string(grid[chosen.x][chosen.y].type)), 1, false);
 				self.replaceGem(chosen, clicked);
+				if (destroyGems(false)) {
+					audio_play_sound(asset_get_index("snd_gem_" + string(irandom_range(2, 4))), 1, false);
+				}
+				else {
+					self.replaceGem(clicked, chosen);
+					audio_play_sound(snd_false_step, 1, false);
+				}
 				chosen = false;
 			}
 			
@@ -127,52 +159,137 @@ function GameGrid(_width, _height) constructor {
 	 *
 	 * @return bool
 	 */
-	static destroyGems = function() {
+	static destroyGems = function(destroy = true) {
 		var result = false;
 		var toDestroy = [];
-		var current;
-		var k;
+		var current_type;
+		var current_coor;
+		
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
-				if (self.cellExistsAndIsNotEmpty(new Coordinate(i, j))) {
-					
-					current = grid[i][j].type;
-					
-					// Horizontal
-					k = 1;
-					while (self.isGemType(new Coordinate(i + k, j), current)) {
-						k++;
-					}
-					if (k >= ROW_SIZE) {
-						for (var m = 0; m < k; m++) {
-							array_push(toDestroy, new Coordinate(i + m, j));
-						}
-					}
-					
-					// Vertical
-					k = 1;
-					while (self.isGemType(new Coordinate(i, j + k), current)) {
-						k++;
-					}
-					if (k >= ROW_SIZE) {
-						for (var m = 0; m < k; m++) {
-							array_push(toDestroy, new Coordinate(i, j + m));
-						}
-					}
+				current_coor = new Coordinate(i, j);
+				if (self.cellExistsAndIsNotEmpty(current_coor)) {
+					current_type = grid[i][j].type;
+					toDestroy = array_merge( 
+						toDestroy,
+						self.findRowOfGems(current_coor, current_type, true)
+					);
+					toDestroy = array_merge( 
+						toDestroy,
+						self.findRowOfGems(current_coor, current_type, false)
+					);
 				}
 			}
 		}
 		
 		if (array_length(toDestroy) > 0) {
 			result = true;
-			for (var i = 0; i < array_length(toDestroy); i++) {
-				if (self.cellExistsAndIsNotEmpty(toDestroy[i])) {
-					grid[toDestroy[i].x][toDestroy[i].y].destroy();
-					grid[toDestroy[i].x][toDestroy[i].y] = EMPTY_CELL;
+			if (destroy) {
+				for (var i = 0; i < array_length(toDestroy); i++) {
+					if (self.cellExistsAndIsNotEmpty(toDestroy[i])) {
+						self.destroyGem(toDestroy[i]);
+					}
 				}
+				audio_play_sound(asset_get_index("snd_destroy_" + string(irandom_range(1, 3))), 1, false);
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Destroy one gem.
+	 *
+	 * @param Coordonate coor
+	 *
+	 * @return void
+	 */
+	static destroyGem = function(coor) {
+		instance_destroy(grid[coor.x][coor.y].instance);
+		grid[coor.x][coor.y] = EMPTY_CELL;
+		global.score += 100;
+	}
+	
+	/**
+	 * Find gems in rows.
+	 *
+	 * @param Coordinate coor
+	 * @param int type
+	 * @param bool hor
+	 *   Horizonal or vertical.
+	 * @param down
+	 *   Search only in down direction or up direction.
+	 *
+	 * @return array
+	 */
+	static findRowOfGems = function(coor, type, hor = true, down = true) {
+		var result = [];
+		var k = 1;
+		while (self.isGemType(
+			hor ? 
+				new Coordinate(coor.x + k * (down ? 1 : -1), coor.y) : 
+				new Coordinate(coor.x, coor.y + k * (down ? 1 : -1)),
+			type
+		)) {
+			k++;
+		}
+		if (k >= ROW_SIZE) {
+			for (var m = 0; m < k; m++) {
+				array_push(
+					result,
+					hor ? 
+						new Coordinate(coor.x + m * (down ? 1 : -1), coor.y) : 
+						new Coordinate(coor.x, coor.y + m * (down ? 1 : -1))
+				);
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Check if next step is possible.
+	 *
+	 * @return bool
+	 */
+	static isNextStepPossible = function() {
+		var variations = [];
+		var result = false;
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				
+				variations = [
+					new Coordinate(i + 1, j),
+					new Coordinate(i - 1, j),
+					new Coordinate(i, j + 1),
+					new Coordinate(i, j + 1)
+				];
+				for (var k = 0; k < array_length(variations); k++) {
+					if (self.cellExistsAndIsNotEmpty(variations[k])) {
+						self.replaceGem(new Coordinate(i, j), variations[k]);
+						if (
+							array_length(self.findRowOfGems(new Coordinate(i, j), grid[i][j].type, true, true)) > 0 ||
+							array_length(self.findRowOfGems(new Coordinate(i, j), grid[i][j].type, false, true)) > 0 ||
+							array_length(self.findRowOfGems(new Coordinate(i, j), grid[i][j].type, true, false)) > 0 ||
+							array_length(self.findRowOfGems(new Coordinate(i, j), grid[i][j].type, false, false)) > 0 ||
+
+							array_length(self.findRowOfGems(variations[k], grid[variations[k].x][variations[k].y].type, true, true)) > 0 ||
+							array_length(self.findRowOfGems(variations[k], grid[variations[k].x][variations[k].y].type, false, true)) > 0 ||
+							array_length(self.findRowOfGems(variations[k], grid[variations[k].x][variations[k].y].type, true, false)) > 0 ||
+							array_length(self.findRowOfGems(variations[k], grid[variations[k].x][variations[k].y].type, false, false)) > 0
+						) {
+							result = true;
+						}
+						self.replaceGem(new Coordinate(i, j), variations[k]);
+
+						if (result) {
+							return true;
+						}
+					}
+				}
+			
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -283,7 +400,7 @@ function GameGrid(_width, _height) constructor {
 	 *
 	 * @return int
 	 */
-	static mouse_get_x = function(x) {
+	static mouseGetX = function(x) {
 		return floor((x - PADDING) / TILE_SIZE);
 	}
 	
@@ -294,7 +411,7 @@ function GameGrid(_width, _height) constructor {
 	 *
 	 * @return int
 	 */
-	static mouse_get_y = function(y) {
+	static mouseGetY = function(y) {
 		return floor((y - PADDING) / TILE_SIZE);
 	}
 	
