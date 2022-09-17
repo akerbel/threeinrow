@@ -1,24 +1,53 @@
 /// @description
 
+#region Constants
+
 #macro GEM_LAYER "Instances"
 #macro PARTICLE_LAYER "Particles"
 #macro GEM_MAX_TYPE 8
 #macro TILE_SIZE 16
+#macro TILE_SIZE_HALF 8
 #macro FALL_SPEED 6
+#macro CAMERA_ROTATE_SPEED 5
 #macro ROW_SIZE 3
 #macro EMPTY_CELL -1
 #macro DEFAULT_CAMERA view_get_camera(0)
 
 #macro PADDING 20
 
-global.game_grid = new GameGrid(1);
-game_grid = global.game_grid;
-game_grid.init();
+#endregion
 
-global.player_active = false;
-global.chosen_gem = false;
-global.score = 0;
+#region Enums
 
+	enum menu {
+		resume,
+		new_game,
+		settings,
+		game_exit,
+		amount,
+	}
+	
+	enum effects {
+		none,
+		hor_blow,
+		ver_blow,
+		cros_blow,
+		rotate_clockwise,
+		rotate_counterclockwise,
+		amount,
+	}
+	
+#endregion
+
+#region Main menu items
+
+menu_items = [];
+menu_items[menu.resume] = "Resume";
+menu_items[menu.new_game] = "New Game";
+menu_items[menu.settings] = "Settings";
+menu_items[menu.game_exit] = "Exit";
+
+#endregion
 
 #region Particles
 
@@ -60,3 +89,40 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 }
 
 #endregion
+
+#region Settings
+
+settings = {
+	complexity: 1,
+	language: "en",
+	volume: 50,
+}
+
+#endregion
+
+#region Effects
+
+var eff = [];
+eff[effects.hor_blow] = {
+	sprite: spr_hor_blow,
+}
+eff[effects.ver_blow] = {
+	sprite: spr_ver_blow,
+}
+eff[effects.cros_blow] = {
+	sprite: spr_cros_blow,
+}
+eff[effects.rotate_clockwise] = {
+	sprite: spr_rotate_clockwise,
+}
+eff[effects.rotate_counterclockwise] = {
+	sprite: spr_rotate_counterclockwise,
+}
+global.effects = eff;
+
+#endregion
+
+game_grid = new GameGrid();
+game_grid.init(settings.complexity);
+menu_active = false;
+global.camera_angle = 0;

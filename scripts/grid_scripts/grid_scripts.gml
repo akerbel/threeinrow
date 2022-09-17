@@ -1,31 +1,37 @@
-function GameGrid(complexity) constructor {
-	
-	grid = [];
-	
-	switch (complexity) {
-		case 1:
-			width = 10;
-			height = 10;
-			gem_types = 4;
-			break;
-		case 2:
-			width = 12;
-			height = 12;
-			gem_types = 6;
-			break;
-		default:
-			width = 14;
-			height = 14;
-			gem_types = 8;
-	}
+function GameGrid() constructor {
 
 	/**
 	 * Create grid and fill it with random gems.
 	 * Set camera view regarding grid size.
 	 *
+	 * @param int complexity
+	 *
 	 * @return void
 	 */
-	static init = function() {
+	static init = function(complexity) {
+		
+		grid = [];
+	
+		switch (complexity) {
+			case 1:
+				width = 10;
+				height = 10;
+				gem_types = 4;
+				break;
+			case 2:
+				width = 12;
+				height = 12;
+				gem_types = 6;
+				break;
+			default:
+				width = 14;
+				height = 14;
+				gem_types = 8;
+		}
+		
+		global.player_active = false;
+		global.chosen_gem = false;
+		global.score = 0;
 		
 		camera_set_view_size(
 			DEFAULT_CAMERA,
@@ -204,6 +210,12 @@ function GameGrid(complexity) constructor {
 	 * @return void
 	 */
 	static destroyGem = function(coor) {
+		if (grid[coor.x][coor.y].effect == effects.rotate_counterclockwise) {
+			global.camera_angle += 90;
+		}
+		else if (grid[coor.x][coor.y].effect == effects.rotate_clockwise) {
+			global.camera_angle -= 90;
+		}
 		instance_destroy(grid[coor.x][coor.y].instance);
 		grid[coor.x][coor.y] = EMPTY_CELL;
 		global.score += 100;
@@ -290,6 +302,11 @@ function GameGrid(complexity) constructor {
 			}
 		}
 		return false;
+	}
+	
+	static addGemEffect = function(coor, effect) {
+		grid[coor.x][coor.y].effect = effect;
+		grid[coor.x][coor.y].instance.effect = effect;
 	}
 	
 	/**
