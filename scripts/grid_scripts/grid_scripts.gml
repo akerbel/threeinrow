@@ -11,6 +11,13 @@ function GameGrid() constructor {
 	static init = function(complexity) {
 		
 		grid = [];
+		
+		// Delete gems after previous game
+		var gem = instance_nearest(0, 0, obj_gem)
+		while (gem != noone) {
+			instance_destroy(gem);
+			gem = instance_nearest(0, 0, obj_gem)
+		}
 	
 		switch (complexity) {
 			case 1:
@@ -39,14 +46,16 @@ function GameGrid() constructor {
 			(PADDING * 2) + (height * TILE_SIZE),
 		);
 		
-		// @todo rotating camera
-		//camera_set_view_angle(DEFAULT_CAMERA, 90);
-		
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
 				grid[i][j] = new Gem(i, j, irandom_range(1, gem_types));
 			}
 		}
+		
+		if (complexity > 0) {
+			global.menu_window.elements[0].show();
+		}
+		
 	}
 	
 	/**

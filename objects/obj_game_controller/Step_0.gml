@@ -25,11 +25,3 @@ if (!menu_active) {
 		camera_set_view_angle(DEFAULT_CAMERA, current_camera_angle - CAMERA_ROTATE_SPEED);
 	}
 }
-
-if (keyboard_check_pressed(vk_escape)) {
-	menu_active = !menu_active;
-}
-
-if (menu_active) {
-	
-}

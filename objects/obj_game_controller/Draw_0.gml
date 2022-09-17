@@ -1,6 +1,6 @@
 /// @description
 
-draw_sprite_stretched(spr_borders, 0, PADDING - 4, PADDING - 4, game_grid.width * TILE_SIZE + 8, game_grid.height * TILE_SIZE + 8);
+draw_sprite_stretched(spr_borders_transparent, 0, PADDING - 4, PADDING - 4, game_grid.width * TILE_SIZE + 8, game_grid.height * TILE_SIZE + 8);
 
 var chosen = global.chosen_gem;
 if (chosen != false) {

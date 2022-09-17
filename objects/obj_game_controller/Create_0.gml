@@ -19,14 +19,6 @@
 
 #region Enums
 
-	enum menu {
-		resume,
-		new_game,
-		settings,
-		game_exit,
-		amount,
-	}
-	
 	enum effects {
 		none,
 		hor_blow,
@@ -39,13 +31,74 @@
 	
 #endregion
 
+#region Settings
+
+settings = {
+	complexity: 1,
+	language: "en",
+	volume: 50,
+}
+
+#endregion
+
+game_grid = new GameGrid();
+game_grid.init(0);
+menu_active = true;
+global.camera_angle = 0;
+
 #region Main menu items
 
-menu_items = [];
-menu_items[menu.resume] = "Resume";
-menu_items[menu.new_game] = "New Game";
-menu_items[menu.settings] = "Settings";
-menu_items[menu.game_exit] = "Exit";
+	var menu_button_style = new akGuiStyle();
+	menu_button_style.setMargin(10);
+	menu_button_style.setPadding(10);
+	menu_button_style.setWidth(200);
+	menu_button_style.setHeight(50);
+	menu_button_style.setFont(fnt_buttons);
+	menu_button_style.setSprite(spr_borders);
+
+	var menu_window_style = new akGuiStyle();
+	menu_window_style.setPosition(akGuiStylePositions.center);
+	menu_window_style.setSprite(spr_borders);
+
+	global.menu_window = new akGuiWindow();
+	global.menu_window.setStyle(menu_window_style);
+
+	// Resume
+	var menu_button = new akGuiButton("Resume");
+	menu_button.setStyle(menu_button_style);
+	var resume = function() {
+		menu_active = false;
+	}
+	menu_button.onClick(resume);
+	menu_button.onKeyPressed(vk_escape, resume);
+	menu_button.hide(); // hide at the start of the game.
+	global.menu_window.setElement(menu_button);
+	
+	// New game
+	var menu_button = new akGuiButton("New game");
+	menu_button.setStyle(menu_button_style);
+	menu_button.onClick(function(){
+		game_grid.init(settings.complexity);
+		menu_active = false;
+	});
+	global.menu_window.setElement(menu_button);
+	
+	// Settings
+	var menu_button = new akGuiButton("Settings");
+	menu_button.setStyle(menu_button_style);
+	menu_button.onClick(function(){
+		// ... open settings window
+	});
+	global.menu_window.setElement(menu_button);
+	
+	
+	// Exit
+	var menu_button = new akGuiButton("Exit");
+	menu_button.setStyle(menu_button_style);
+	menu_button.onClick(function(){
+		game_end();
+	});
+	global.menu_window.setElement(menu_button);
 
 #endregion
 
@@ -90,16 +143,6 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 
 #endregion
 
-#region Settings
-
-settings = {
-	complexity: 1,
-	language: "en",
-	volume: 50,
-}
-
-#endregion
-
 #region Effects
 
 var eff = [];
@@ -121,8 +164,3 @@ eff[effects.rotate_counterclockwise] = {
 global.effects = eff;
 
 #endregion
-
-game_grid = new GameGrid();
-game_grid.init(settings.complexity);
-menu_active = false;
-global.camera_angle = 0;
