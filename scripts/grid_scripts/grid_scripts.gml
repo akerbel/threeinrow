@@ -30,6 +30,11 @@ function GameGrid() constructor {
 				height = 12;
 				gem_types = 6;
 				break;
+			case 3: // Game Over testing
+				width = 4;
+				height = 4;
+				gem_types = 6;
+				break;
 			default:
 				width = 14;
 				height = 14;
@@ -51,11 +56,7 @@ function GameGrid() constructor {
 				grid[i][j] = new Gem(i, j, irandom_range(1, gem_types));
 			}
 		}
-		
-		if (complexity > 0) {
-			global.menu_window.elements[0].show();
-		}
-		
+
 	}
 	
 	/**

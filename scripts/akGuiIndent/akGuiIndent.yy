@@ -6,6 +6,6 @@
   "isCompatibility": false,
   "parent": {
     "name": "akGuiStyles",
-    "path": "folders/Scripts/GUI/akGuiStyles.yy",
+    "path": "folders/Plugins/akGui/akGuiStyles.yy",
   },
 }

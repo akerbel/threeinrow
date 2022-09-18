@@ -48,6 +48,26 @@ global.camera_angle = 0;
 
 #region Main menu items
 
+	// Main menu window
+	var menu_window_style = new akGuiStyle();
+	menu_window_style.setPosition(akGuiStylePositions.center);
+	menu_window_style.setSprite(spr_borders);
+	global.menu_window = new akGuiWindow();
+	global.menu_window.setStyle(menu_window_style);
+
+	// Game over message
+	var game_over_style = new akGuiStyle();
+	game_over_style.setFont(fnt_game_over);
+	game_over_style.setWidth(220);
+	game_over_style.setHeight(50);
+	game_over_style.setMargin(10);
+	game_over_style.setPadding(10);
+	var game_over_message = new akGuiButton("game_over_message", "Game Over");
+	game_over_message.setStyle(game_over_style);
+	game_over_message.hide();
+	global.menu_window.setElement(game_over_message);
+
+	// Button style
 	var menu_button_style = new akGuiStyle();
 	menu_button_style.setMargin(10);
 	menu_button_style.setPadding(10);
@@ -55,16 +75,10 @@ global.camera_angle = 0;
 	menu_button_style.setHeight(50);
 	menu_button_style.setFont(fnt_buttons);
 	menu_button_style.setSprite(spr_borders);
-
-	var menu_window_style = new akGuiStyle();
-	menu_window_style.setPosition(akGuiStylePositions.center);
-	menu_window_style.setSprite(spr_borders);
-
-	global.menu_window = new akGuiWindow();
-	global.menu_window.setStyle(menu_window_style);
+	menu_button_style.setPosition(akGuiStylePositions.center);
 
 	// Resume
-	var menu_button = new akGuiButton("Resume");
+	var menu_button = new akGuiButton("resume_button", "Resume");
 	menu_button.setStyle(menu_button_style);
 	var resume = function() {
 		menu_active = false;
@@ -79,7 +93,10 @@ global.camera_angle = 0;
 	menu_button.setStyle(menu_button_style);
 	menu_button.onClick(function(){
 		game_grid.init(settings.complexity);
+		//game_grid.init(3);
 		menu_active = false;
+		global.menu_window.getElement("game_over_message").hide();
+		global.menu_window.getElement("resume_button").show();
 	});
 	global.menu_window.setElement(menu_button);
 	
@@ -90,7 +107,6 @@ global.camera_angle = 0;
 		// ... open settings window
 	});
 	global.menu_window.setElement(menu_button);
-	
 	
 	// Exit
 	var menu_button = new akGuiButton("Exit");

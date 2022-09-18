@@ -5,7 +5,9 @@ if (!menu_active) {
 		game_grid.click(mouse_x, mouse_y);
 	}
 	else if (global.player_active && !game_grid.isNextStepPossible()) {
-		show_message("GAME OVER");
+		global.menu_window.getElement("game_over_message").show();
+		global.menu_window.getElement("resume_button").hide();
+		menu_active = true;
 	}
 	else if (!game_grid.isSomethingMoving()) {
 		if (!game_grid.fallGem()) {
