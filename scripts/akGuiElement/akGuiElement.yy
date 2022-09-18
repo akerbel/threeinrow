@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "akGuiElement",
+  "name": "AkGuiElement",
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "akGuiElements",
-    "path": "folders/Plugins/akGui/akGuiElements.yy",
+    "name": "AkGuiElements",
+    "path": "folders/Plugins/AkGui/AkGuiElements.yy",
   },
 }

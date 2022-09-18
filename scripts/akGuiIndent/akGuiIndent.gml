@@ -1,4 +1,4 @@
-function akGuiIndent(_top, _right = -1, _bottom = -1, _left = -1) constructor {
+function AkGuiIndent(_top, _right = -1, _bottom = -1, _left = -1) constructor {
 	
 	top = _top;
 	right = _right;

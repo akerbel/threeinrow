@@ -1,10 +1,10 @@
 /**
  * Merge two arrays into new array.
  *
- * @param array ar1
- * @param array ar2
+ * @param {array} ar1
+ * @param {array} ar2
  *
- * @return array
+ * @return {array<any*>}
  */
 function array_merge(ar1, ar2) {
 	var result = [];

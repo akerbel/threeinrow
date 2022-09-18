@@ -45,40 +45,42 @@ game_grid = new GameGrid();
 game_grid.init(0);
 menu_active = true;
 global.camera_angle = 0;
+global.player_active = false;
 
 #region Main menu items
 
 	// Main menu window
-	var menu_window_style = new akGuiStyle();
-	menu_window_style.setPosition(akGuiStylePositions.center);
+	var menu_window_style = new AkGuiStyle();
+	menu_window_style.setPosition(AkGuiStylePositions.center);
 	menu_window_style.setSprite(spr_borders);
-	global.menu_window = new akGuiWindow();
-	global.menu_window.setStyle(menu_window_style);
+	var menu_window = new AkGuiWindow();
+	menu_window.setStyle(menu_window_style);
 
 	// Game over message
-	var game_over_style = new akGuiStyle();
+	var game_over_style = new AkGuiStyle();
 	game_over_style.setFont(fnt_game_over);
 	game_over_style.setWidth(220);
 	game_over_style.setHeight(50);
 	game_over_style.setMargin(10);
 	game_over_style.setPadding(10);
-	var game_over_message = new akGuiButton("game_over_message", "Game Over");
+	var game_over_message = new AkGuiButton("game_over_message", "Game Over");
 	game_over_message.setStyle(game_over_style);
 	game_over_message.hide();
-	global.menu_window.setElement(game_over_message);
+	menu_window.setElement(game_over_message);
 
 	// Button style
-	var menu_button_style = new akGuiStyle();
+	var menu_button_style = new AkGuiStyle();
 	menu_button_style.setMargin(10);
 	menu_button_style.setPadding(10);
-	menu_button_style.setWidth(200);
+	menu_button_style.setWidth(300);
 	menu_button_style.setHeight(50);
 	menu_button_style.setFont(fnt_buttons);
 	menu_button_style.setSprite(spr_borders);
-	menu_button_style.setPosition(akGuiStylePositions.center);
+	menu_button_style.setPosition(AkGuiStylePositions.center);
+	menu_button_style.setFontAlign(AkGuiStyleFontAlign.center);
 
 	// Resume
-	var menu_button = new akGuiButton("resume_button", "Resume");
+	var menu_button = new AkGuiButton("resume_button", "Resume");
 	menu_button.setStyle(menu_button_style);
 	var resume = function() {
 		menu_active = false;
@@ -86,10 +88,10 @@ global.camera_angle = 0;
 	menu_button.onClick(resume);
 	menu_button.onKeyPressed(vk_escape, resume);
 	menu_button.hide(); // hide at the start of the game.
-	global.menu_window.setElement(menu_button);
+	menu_window.setElement(menu_button);
 	
 	// New game
-	var menu_button = new akGuiButton("New game");
+	menu_button = new AkGuiButton("New game");
 	menu_button.setStyle(menu_button_style);
 	menu_button.onClick(function(){
 		game_grid.init(settings.complexity);
@@ -98,23 +100,25 @@ global.camera_angle = 0;
 		global.menu_window.getElement("game_over_message").hide();
 		global.menu_window.getElement("resume_button").show();
 	});
-	global.menu_window.setElement(menu_button);
+	menu_window.setElement(menu_button);
 	
 	// Settings
-	var menu_button = new akGuiButton("Settings");
+	menu_button = new AkGuiButton("Settings");
 	menu_button.setStyle(menu_button_style);
 	menu_button.onClick(function(){
 		// ... open settings window
 	});
-	global.menu_window.setElement(menu_button);
+	menu_window.setElement(menu_button);
 	
 	// Exit
-	var menu_button = new akGuiButton("Exit");
+	menu_button = new AkGuiButton("Exit");
 	menu_button.setStyle(menu_button_style);
 	menu_button.onClick(function(){
 		game_end();
 	});
-	global.menu_window.setElement(menu_button);
+	menu_window.setElement(menu_button);
+	
+	global.menu_window = menu_window;
 
 #endregion
 
@@ -127,7 +131,7 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 	var p = part_type_create();
 
 	part_type_shape(p, pt_shape_spark);
-	part_type_life(p, room_speed, room_speed);
+	part_type_life(p, game_get_speed(gamespeed_fps), game_get_speed(gamespeed_fps));
 	part_type_alpha2(p, 1, 0);
 	part_type_size(p, 0.2, 0.1, 0.001, 0);
 	part_type_speed(p, 1, 2, 0.001, 0);

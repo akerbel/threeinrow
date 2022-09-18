@@ -4,9 +4,7 @@ function GameGrid() constructor {
 	 * Create grid and fill it with random gems.
 	 * Set camera view regarding grid size.
 	 *
-	 * @param int complexity
-	 *
-	 * @return void
+	 * @param {real} complexity
 	 */
 	static init = function(complexity) {
 		
@@ -48,7 +46,7 @@ function GameGrid() constructor {
 		camera_set_view_size(
 			DEFAULT_CAMERA,
 			(PADDING * 2) + (width * TILE_SIZE),
-			(PADDING * 2) + (height * TILE_SIZE),
+			(PADDING * 2) + (height * TILE_SIZE)
 		);
 		
 		for (var i = 0; i < width; i++) {
@@ -81,8 +79,9 @@ function GameGrid() constructor {
 	 * @return bool
 	 */
 	static fallGem = function() {
+		var result;
 		do {
-			var result = false;
+			result = false;
 			for (var i = 0; i < width; i++) {
 				for (var j = 0; j < height; j++) {
 					var newCell = new Coordinate(i, j + 1);
@@ -103,10 +102,8 @@ function GameGrid() constructor {
 	/**
 	 * Move gem to an empty cell.
 	 *
-	 * @param Coordinate oldCell
-	 * @param Coordinate newCell
-	 *
-	 * @return void
+	 * @param {struct.Coordinate} oldCell
+	 * @param {struct.Coordinate} newCell
 	 */
 	static moveGem = function(oldCell, newCell) {
 		grid[newCell.x][newCell.y] = grid[oldCell.x][oldCell.y];
@@ -118,10 +115,8 @@ function GameGrid() constructor {
 	/**
 	 * Replace two gems by each other.
 	 *
-	 * @param Coordinate oldCell
-	 * @param Coordinate newCell
-	 *
-	 * @return void
+	 * @param {struct.Coordinate} oldCell
+	 * @param {struct.Coordinate} newCell
 	 */
 	static replaceGem = function(oldCell, newCell) {
 		var tempGem = grid[newCell.x][newCell.y];
@@ -134,10 +129,10 @@ function GameGrid() constructor {
 	/**
 	 * Click on a cell.
 	 *
-	 * @param int mouse_x
-	 * @param int mouse_x
+	 * @param {real} mouse_x
+	 * @param {real} mouse_y
 	 *
-	 * @return void
+	 * @context <GameGrid>
 	 */
 	static click = function(mouse_x, mouse_y) {
 		var clicked = new Coordinate(self.mouseGetX(mouse_x), self.mouseGetY(mouse_y));
@@ -173,7 +168,7 @@ function GameGrid() constructor {
 	/**
 	 * Find and destroy rows of gems.
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static destroyGems = function(destroy = true) {
 		var result = false;
@@ -215,7 +210,7 @@ function GameGrid() constructor {
 	/**
 	 * Destroy one gem.
 	 *
-	 * @param Coordonate coor
+	 * @param {struct.Coordinate} coor
 	 *
 	 * @return void
 	 */
@@ -234,14 +229,14 @@ function GameGrid() constructor {
 	/**
 	 * Find gems in rows.
 	 *
-	 * @param Coordinate coor
-	 * @param int type
-	 * @param bool hor
+	 * @param {struct.Coordinate} coor
+	 * @param {real} type
+	 * @param {bool} hor
 	 *   Horizonal or vertical.
-	 * @param down
+	 * @param {bool} down
 	 *   Search only in down direction or up direction.
 	 *
-	 * @return array
+	 * @return {array<struct.Coordinate>}
 	 */
 	static findRowOfGems = function(coor, type, hor = true, down = true) {
 		var result = [];
@@ -322,10 +317,10 @@ function GameGrid() constructor {
 	/**
 	 * Check if cell has gem of type.
 	 *
-	 * @param Coordinate coor
-	 * @param int type
+	 * @param {struct.Coordinate} coor
+	 * @param {real} type
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static isGemType = function(coor, type) {
 		if (!self.cellExistsAndIsNotEmpty(coor)) {
@@ -338,9 +333,9 @@ function GameGrid() constructor {
 	/**
 	 * Check if the gem is moving.
 	 *
-	 * @param Coordinate coor
+	 * @param {struct.Coordinate} coor
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static isGemMoving = function(coor) {
 		if (!self.cellExistsAndIsNotEmpty(coor)) {
@@ -369,9 +364,9 @@ function GameGrid() constructor {
 	/**
 	 * Check if cell is empty.
 	 *
-	 * @param Coordinate coor
+	 * @param {struct.Coordinate} coor
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static cellIsEmpty = function(coor) {
 		return (grid[coor.x][coor.y] == EMPTY_CELL);
@@ -380,9 +375,9 @@ function GameGrid() constructor {
 	/**
 	 * Check if cell exists.
 	 *
-	 * @param Coordinate coor
+	 * @param {struct.Coordinate} coor
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static cellExists = function(coor) {
 		return (coor.x >= 0 && coor.x < width) && (coor.y >= 0 && coor.y < height);
@@ -391,9 +386,9 @@ function GameGrid() constructor {
 	/**
 	 * Check if cell exists and is NOT empty.
 	 *
-	 * @param Coordinate coor
+	 * @param {struct.Coordinate} coor
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static cellExistsAndIsNotEmpty = function(coor) {
 		if (self.cellExists(coor)) {
@@ -407,9 +402,9 @@ function GameGrid() constructor {
 	/**
 	 * Check if cell exists and is empty.
 	 *
-	 * @param Coordinate coor
+	 * @param {struct.Coordinate} coor
 	 *
-	 * @return bool
+	 * @return {bool}
 	 */
 	static cellExistsAndIsEmpty = function(coor) {
 		if (self.cellExists(coor)) {
@@ -423,9 +418,9 @@ function GameGrid() constructor {
 	/**
 	 * Turn mouse x coordinate to grid x coordinate.
 	 *
-	 * @param int x
+	 * @param {real} x
 	 *
-	 * @return int
+	 * @return {real}
 	 */
 	static mouseGetX = function(x) {
 		return floor((x - PADDING) / TILE_SIZE);
@@ -434,9 +429,9 @@ function GameGrid() constructor {
 	/**
 	 * Turn mouse y coordinate to grid y coordinate.
 	 *
-	 * @param int y
+	 * @param {real} y
 	 *
-	 * @return int
+	 * @return {real}
 	 */
 	static mouseGetY = function(y) {
 		return floor((y - PADDING) / TILE_SIZE);

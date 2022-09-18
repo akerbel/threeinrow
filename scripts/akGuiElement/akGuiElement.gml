@@ -1,11 +1,11 @@
 ///
-/// @func akGuiElement(_name)
+/// @func AkGuiElement(_name)
 ///
 /// @desc Element of akGui.
 ///
-/// @param string _name
+/// @param {string} _name
 ///
-function akGuiElement(_name = "") constructor {
+function AkGuiElement(_name = "") constructor {
 
 	#region Parent
 
@@ -13,14 +13,14 @@ function akGuiElement(_name = "") constructor {
 
 		/// @func setParent(_parent)
 		///
-		/// @param akGuiElement _parent
+		/// @param {struct.AkGuiElement} _parent
 		static setParent = function(_parent) {
 			parent = _parent;
 		}
 
 		/// @func getParent()
 		///
-		/// @return akGuiElement|noone
+		/// @return {struct.AkGuiElement}
 		static getParent = function() {
 			return parent;
 		}
@@ -33,14 +33,14 @@ function akGuiElement(_name = "") constructor {
 
 		/// @func setName(_name)
 		///
-		/// @param string _name
+		/// @param {string} _name
 		static setName = function(_name) {
 			name = _name;
 		}
 
 		/// @func getName()
 		///
-		/// @return string
+		/// @return {string}
 		static getName = function() {
 			return name;
 		}
@@ -69,7 +69,7 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @desc Set function on "click" event.
 		///
-		/// @param function func
+		/// @param {function} func
 		static onClick = function(func) {
 			_onClick = func;
 		}
@@ -77,9 +77,11 @@ function akGuiElement(_name = "") constructor {
 		/// @func click()
 		///
 		/// @desc "click" event.
+		///
+		/// @context <AkGuiElement>
 		static click = function() {
-			var click_x = self.getDrawX(_x);
-			var click_y = self.getDrawY(_y);
+			var click_x = self.getDrawX();
+			var click_y = self.getDrawY();
 			if (mouse_check_button_pressed(mb_left) && 
 				point_in_rectangle(
 					device_mouse_x_to_gui(0), device_mouse_y_to_gui(0),
@@ -101,8 +103,8 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @desc Set function on "keyPressed" event.
 		///
-		/// @param int _key
-		/// @param function func
+		/// @param {real} _key Integer key
+		/// @param {function} _func
 		static onKeyPressed = function (_key, _func) {
 			array_push(_onKeyPressed, {key: _key, func: _func});
 		}
@@ -122,11 +124,11 @@ function akGuiElement(_name = "") constructor {
 	
 	#region Style
 	
-		style = new akGuiStyle();
+		style = new AkGuiStyle();
 		
 		/// @func setStyle(_style)
 		///
-		/// @param akGuiStyle _style
+		/// @param {struct.AkGuiStyle} _style
 		static setStyle = function(_style) {
 			style = _style;
 		}
@@ -159,7 +161,7 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @return real
 		static getAvailableWidth = function() {
-			return style.width - style.padding.left + style.margin.right;
+			return style.width - style.padding.left - style.padding.right;
 		}
 
 		/// @func getAvailableHeight()
@@ -168,7 +170,7 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @return real
 		static getAvailableHeight = function() {
-			return style.height - style.padding.top + style.margin.bottom;
+			return style.height - style.padding.top - style.padding.bottom;
 		}
 
 	#endregion
@@ -182,18 +184,18 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @desc Set element position, regarding its "position" style.
 		///
-		/// @param real pos_x
-		/// @param real pos_y
+		/// @param {real} pos_x
+		/// @param {real} pos_y
 		static setPosition = function(pos_x, pos_y) {
 
 			// Centering regarding screen.
-			if (style.position == akGuiStylePositions.center && parent == noone) {
+			if (style.position == AkGuiStylePositions.center && parent == noone) {
 				_x = (display_get_gui_width() / 2) - (self.getFullWidth() / 2);
 				_y = (display_get_gui_height() / 2) - (self.getFullHeight() / 2);
 			}
 
 			// Centering regarding parent (only horizontal).
-			else if (style.position == akGuiStylePositions.center && parent != noone) {
+			else if (style.position == AkGuiStylePositions.center && parent != noone) {
 				_x = pos_x + (parent.getFullWidth() / 2) - (self.getFullWidth() / 2);
 				_y = pos_y;
 			}
@@ -255,7 +257,7 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @return bool
 		static isHidden = function() {
-			return (hidden || style.display == akGuiStyleDisplay.none)
+			return (hidden || style.display == AkGuiStyleDisplay.none)
 		}
 		
 		/// @func hide()
@@ -287,7 +289,7 @@ function akGuiElement(_name = "") constructor {
 		///
 		/// @desc Clone parameters from another element.
 		///
-		/// @param akGuiElement donor
+		/// @param {struct.AkGuiElement} donor
 		static clone = function(donor) {
 			var keys = variable_struct_get_names(donor);
 			var value;
@@ -295,6 +297,53 @@ function akGuiElement(_name = "") constructor {
 				value = variable_struct_get(donor, keys[i]);
 				variable_struct_set(self, keys[i], value);
 			}
+		}
+		
+		static drawDebug = function() {
+		
+			// Border inside patent.
+			draw_rectangle_color(
+				self.getDrawX() - style.margin.left,
+				self.getDrawY() - style.margin.top,
+				self.getDrawX() + style.width + style.margin.right,
+				self.getDrawY() + style.height + style.margin.bottom,
+				c_blue, c_blue, c_blue, c_blue, true
+			);
+		
+			// Visible border (if sprite is set).
+			draw_rectangle_color(
+				self.getDrawX(),
+				self.getDrawY(),
+				self.getDrawX() + style.width,
+				self.getDrawY() + style.height,
+				c_red, c_red, c_red, c_red, true
+			);
+			
+			// Content border.
+			draw_rectangle_color(
+				self.getDrawX() + style.padding.left,
+				self.getDrawY() + style.padding.top,
+				self.getDrawX() + style.width - style.padding.right,
+				self.getDrawY() + style.height - style.padding.bottom,
+				c_green, c_green, c_green, c_green, true
+			);
+			
+			// Center.
+			draw_line_color(
+				self.getDrawX() + (style.width / 2),
+				self.getDrawY(),
+				self.getDrawX() + (style.width / 2),
+				self.getDrawY() + style.height,
+				c_white, c_white
+			);
+			draw_line_color(
+				self.getDrawX(),
+				self.getDrawY() + (style.height / 2),
+				self.getDrawX() + style.width,
+				self.getDrawY() + (style.height / 2),
+				c_white, c_white
+			);
+		
 		}
 	
 	#endregion

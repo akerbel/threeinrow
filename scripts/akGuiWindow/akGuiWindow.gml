@@ -1,18 +1,18 @@
 ///
-/// @func akGuiWindow(_name)
+/// @func AkGuiWindow(_name)
 ///
 /// @desc Window of akGui.
 ///
-/// @param string _name
+/// @param {string} _name 
 ///
-function akGuiWindow(_name = ""): akGuiElement(_name = "") constructor {
+function AkGuiWindow(_name = ""): AkGuiElement(_name) constructor {
 
 	// Elements inside (buttons, etc).
 	elements = [];
 	
 	/// @func setElement(element)
 	///
-	/// @param akGuiElement _parent
+	/// @param {struct.AkGuiElement} element
 	static setElement = function(element) {
 		element.setParent(self);
 		array_push(elements, element);
@@ -20,7 +20,7 @@ function akGuiWindow(_name = ""): akGuiElement(_name = "") constructor {
 	
 	/// @func getElement()
 	///
-	/// @return akGuiElement|noone
+	/// @return {struct.AkGuiElement}
 	static getElement = function(name) {
 		for (var i = 0; i < array_length(elements); i++) {
 			if (elements[i].getName() == name) {
@@ -34,8 +34,8 @@ function akGuiWindow(_name = ""): akGuiElement(_name = "") constructor {
 	///
 	/// @desc Draw the window.
 	///
-	/// @param real pos_x
-	/// @param real pos_y
+	/// @param {real} pos_x
+	/// @param {real} pos_y
 	static draw = function(pos_x = 0, pos_y = 0) {
 		
 		if (self.isHidden()) {
@@ -72,7 +72,7 @@ function akGuiWindow(_name = ""): akGuiElement(_name = "") constructor {
 		self.drawSprite();
 		
 		// Draw elements inside.
-		var elements_height = 0;
+		elements_height = 0;
 		for (var i = 0; i < array_length(elements); i++) {
 			
 			// Do not draw hidden elements.
