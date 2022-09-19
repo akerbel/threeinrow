@@ -18,25 +18,25 @@ function GameGrid() constructor {
 		}
 	
 		switch (complexity) {
-			case 1:
+			case 0:
 				width = 10;
 				height = 10;
 				gem_types = 4;
 				break;
-			case 2:
+			case 1:
 				width = 12;
 				height = 12;
 				gem_types = 6;
 				break;
-			case 3: // Game Over testing
-				width = 4;
-				height = 4;
-				gem_types = 6;
-				break;
-			default:
+			case 2:
 				width = 14;
 				height = 14;
 				gem_types = 8;
+				break;
+			default: // Game Over testing
+				width = 4;
+				height = 4;
+				gem_types = 6;
 		}
 		
 		global.player_active = false;

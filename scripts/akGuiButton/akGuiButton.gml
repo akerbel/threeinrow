@@ -13,8 +13,11 @@ function AkGuiButton(_name = "", _text = "") : AkGuiElement(_name) constructor {
 	/// @func setText(new_text)
 	///
 	/// @param {string} new_text
+	///
+	/// @return {struct.AkGuiButton}
 	static setText = function(new_text) {
 		text = new_text;
+		return self;
 	}
 
 	/// @func draw(pos_x, pos_y)
@@ -23,6 +26,8 @@ function AkGuiButton(_name = "", _text = "") : AkGuiElement(_name) constructor {
 	///
 	/// @param {real} pos_x
 	/// @param {real} pos_y
+	///
+	/// @return {struct.AkGuiButton}
 	static draw = function(pos_x, pos_y) {
 		// Do not draw, if the button is hidden.
 		if (self.isHidden()) {
@@ -64,6 +69,8 @@ function AkGuiButton(_name = "", _text = "") : AkGuiElement(_name) constructor {
 		// Events.
 		self.click();
 		self.keyPressed();
+		
+		return self;
 	}
 
 }

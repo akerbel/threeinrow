@@ -14,8 +14,11 @@ function AkGuiElement(_name = "") constructor {
 		/// @func setParent(_parent)
 		///
 		/// @param {struct.AkGuiElement} _parent
+		///
+		/// @return {struct.AkGuiElement}
 		static setParent = function(_parent) {
 			parent = _parent;
+			return self;
 		}
 
 		/// @func getParent()
@@ -34,8 +37,11 @@ function AkGuiElement(_name = "") constructor {
 		/// @func setName(_name)
 		///
 		/// @param {string} _name
+		///
+		/// @return {struct.AkGuiElement}
 		static setName = function(_name) {
 			name = _name;
+			return self;
 		}
 
 		/// @func getName()
@@ -52,10 +58,13 @@ function AkGuiElement(_name = "") constructor {
 		/// @func drawSprite()
 		///
 		/// @desc Draw sprite of the element, if defined.
+		///
+		/// @return {struct.AkGuiElement}
 		static drawSprite = function() {
 			if (style.sprite != noone && !self.isHidden()) {
 				draw_sprite_stretched(style.sprite, 0, self.getDrawX(), self.getDrawY(), style.width, style.height);
 			}
+			return self;
 		}
 
 	#endregion
@@ -70,8 +79,11 @@ function AkGuiElement(_name = "") constructor {
 		/// @desc Set function on "click" event.
 		///
 		/// @param {function} func
+		///
+		/// @return {struct.AkGuiElement}
 		static onClick = function(func) {
 			_onClick = func;
+			return self;
 		}
 
 		/// @func click()
@@ -105,8 +117,11 @@ function AkGuiElement(_name = "") constructor {
 		///
 		/// @param {real} _key Integer key
 		/// @param {function} _func
+		///
+		/// @return {struct.AkGuiElement}
 		static onKeyPressed = function (_key, _func) {
 			array_push(_onKeyPressed, {key: _key, func: _func});
+			return self;
 		}
 		
 		/// @func keyPressed()
@@ -126,11 +141,14 @@ function AkGuiElement(_name = "") constructor {
 	
 		style = new AkGuiStyle();
 		
-		/// @func setStyle(_style)
+		/// @func setStyles(_style)
 		///
 		/// @param {struct.AkGuiStyle} _style
-		static setStyle = function(_style) {
+		///
+		/// @return {struct.AkGuiElement}
+		static setStyles = function(_style) {
 			style = _style;
+			return self;
 		}
 
 	#endregion
@@ -186,6 +204,8 @@ function AkGuiElement(_name = "") constructor {
 		///
 		/// @param {real} pos_x
 		/// @param {real} pos_y
+		///
+		/// @return {struct.AkGuiElement}
 		static setPosition = function(pos_x, pos_y) {
 
 			// Centering regarding screen.
@@ -205,6 +225,8 @@ function AkGuiElement(_name = "") constructor {
 				_x = pos_x;
 				_y = pos_y;
 			}
+			
+			return self;
 		}
 
 		/// @func getDrawX()
@@ -263,22 +285,31 @@ function AkGuiElement(_name = "") constructor {
 		/// @func hide()
 		///
 		/// @desc Hide the element.
+		///
+		/// @return {struct.AkGuiElement}
 		static hide = function() {
 			hidden = true;
+			return self;
 		}
 		
 		/// @func show()
 		///
 		/// @desc Show the element.
+		///
+		/// @return {struct.AkGuiElement}
 		static show = function() {
 			hidden = false;
+			return self;
 		}
 		
 		/// @func toggle()
 		///
 		/// @desc Toggle the element.
+		///
+		/// @return {struct.AkGuiElement}
 		static toggle = function() {
 			hidden = !hidden;
+			return self;
 		}
 
 	#endregion
@@ -290,6 +321,8 @@ function AkGuiElement(_name = "") constructor {
 		/// @desc Clone parameters from another element.
 		///
 		/// @param {struct.AkGuiElement} donor
+		///
+		/// @return {struct.AkGuiElement}
 		static clone = function(donor) {
 			var keys = variable_struct_get_names(donor);
 			var value;
@@ -297,8 +330,14 @@ function AkGuiElement(_name = "") constructor {
 				value = variable_struct_get(donor, keys[i]);
 				variable_struct_set(self, keys[i], value);
 			}
+			return self;
 		}
 		
+		/**
+		 * @func drawDebug()
+		 *
+		 * @return {struct.AkGuiElement}
+		 */
 		static drawDebug = function() {
 		
 			// Border inside patent.
@@ -343,9 +382,10 @@ function AkGuiElement(_name = "") constructor {
 				self.getDrawY() + (style.height / 2),
 				c_white, c_white
 			);
-		
+
+			return self;
 		}
-	
+
 	#endregion
 
 }

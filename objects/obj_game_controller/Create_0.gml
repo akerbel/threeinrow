@@ -14,6 +14,10 @@
 #macro DEFAULT_CAMERA view_get_camera(0)
 
 #macro PADDING 20
+#macro MENU_BUTTON_WIDTH 300
+#macro MENU_BUTTON_HEIGHT 50
+#macro MENU_BUTTON_MARGIN 10
+#macro MENU_BUTTON_PADDING 10
 
 #endregion
 
@@ -28,97 +32,246 @@
 		rotate_counterclockwise,
 		amount,
 	}
-	
+
 #endregion
 
 #region Settings
 
 settings = {
 	complexity: 1,
-	language: "en",
+	language: 0,
 	volume: 50,
 }
+
+complexity_levels = [
+	"Easy",
+	"Medium",
+	"Hard",
+];
+
+languages = [
+	"English",
+	"German",
+	"Russian",
+];
 
 #endregion
 
 game_grid = new GameGrid();
-game_grid.init(0);
+game_grid.init(2);
 menu_active = true;
+config_active = false;
 global.camera_angle = 0;
 global.player_active = false;
+
+var default_style = new AkGuiStyle()
+	.setMargin(MENU_BUTTON_MARGIN)
+	.setPadding(MENU_BUTTON_PADDING)
+	.setWidth(MENU_BUTTON_WIDTH)
+	.setHeight(MENU_BUTTON_HEIGHT);
 
 #region Main menu items
 
 	// Main menu window
-	var menu_window_style = new AkGuiStyle();
-	menu_window_style.setPosition(AkGuiStylePositions.center);
-	menu_window_style.setSprite(spr_borders);
-	var menu_window = new AkGuiWindow();
-	menu_window.setStyle(menu_window_style);
+	var menu_window_style = new AkGuiStyle()
+		.setPosition(AkGuiStylePositions.center)
+		.setSprite(spr_borders);
+	var menu_window = new AkGuiWindow("menu")
+		.setStyles(menu_window_style);
 
 	// Game over message
-	var game_over_style = new AkGuiStyle();
-	game_over_style.setFont(fnt_game_over);
-	game_over_style.setWidth(220);
-	game_over_style.setHeight(50);
-	game_over_style.setMargin(10);
-	game_over_style.setPadding(10);
-	var game_over_message = new AkGuiButton("game_over_message", "Game Over");
-	game_over_message.setStyle(game_over_style);
-	game_over_message.hide();
+	var game_over_style = new AkGuiStyle()
+		.clone(default_style)
+		.setFont(fnt_game_over)
+		.setFontAlign(AkGuiStyleFontAlign.center);
+	var game_over_message = new AkGuiButton("game_over_message", "Game Over")
+		.setStyles(game_over_style)
+		.hide();
 	menu_window.setElement(game_over_message);
 
 	// Button style
-	var menu_button_style = new AkGuiStyle();
-	menu_button_style.setMargin(10);
-	menu_button_style.setPadding(10);
-	menu_button_style.setWidth(300);
-	menu_button_style.setHeight(50);
-	menu_button_style.setFont(fnt_buttons);
-	menu_button_style.setSprite(spr_borders);
-	menu_button_style.setPosition(AkGuiStylePositions.center);
-	menu_button_style.setFontAlign(AkGuiStyleFontAlign.center);
+	var menu_button_style = new AkGuiStyle()
+		.clone(default_style)
+		.setFont(fnt_buttons)
+		.setFontAlign(AkGuiStyleFontAlign.center)
+		.setSprite(spr_borders)
+		.setPosition(AkGuiStylePositions.center);
 
 	// Resume
-	var menu_button = new AkGuiButton("resume_button", "Resume");
-	menu_button.setStyle(menu_button_style);
 	var resume = function() {
 		menu_active = false;
 	}
-	menu_button.onClick(resume);
-	menu_button.onKeyPressed(vk_escape, resume);
-	menu_button.hide(); // hide at the start of the game.
+	var menu_button = new AkGuiButton("resume_button", "Resume")
+		.setStyles(menu_button_style)
+		.onClick(resume)
+		.onKeyPressed(vk_escape, resume)
+		.hide(); // hide at the start of the game.
 	menu_window.setElement(menu_button);
 	
 	// New game
-	menu_button = new AkGuiButton("New game");
-	menu_button.setStyle(menu_button_style);
-	menu_button.onClick(function(){
-		game_grid.init(settings.complexity);
-		//game_grid.init(3);
-		menu_active = false;
-		global.menu_window.getElement("game_over_message").hide();
-		global.menu_window.getElement("resume_button").show();
-	});
+	menu_button = new AkGuiButton("New game")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			game_grid.init(settings.complexity);
+			//game_grid.init(3);
+			menu_active = false;
+			global.menu_window.getElement("game_over_message").hide();
+			global.menu_window.getElement("resume_button").show();
+		});
 	menu_window.setElement(menu_button);
 	
 	// Settings
-	menu_button = new AkGuiButton("Settings");
-	menu_button.setStyle(menu_button_style);
-	menu_button.onClick(function(){
-		// ... open settings window
-	});
+	menu_button = new AkGuiButton("Settings")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			config_active = true;
+		});
 	menu_window.setElement(menu_button);
 	
 	// Exit
-	menu_button = new AkGuiButton("Exit");
-	menu_button.setStyle(menu_button_style);
-	menu_button.onClick(function(){
-		game_end();
-	});
+	menu_button = new AkGuiButton("Exit")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			game_end();
+		});
 	menu_window.setElement(menu_button);
 	
 	global.menu_window = menu_window;
+
+#endregion
+
+#region Config window
+
+	var config_window_style = new AkGuiStyle()
+		.clone(menu_window_style);
+	
+	var config_window = new AkGuiWindow("config")
+		.setStyles(config_window_style);
+	
+	var config_element_title_style = new AkGuiStyle()
+		.clone(default_style)
+		.setWidth(MENU_BUTTON_WIDTH / 2)
+		.setFont(fnt_buttons)
+		.setFontAlign(AkGuiStyleFontAlign.left)
+		.setDisplay(AkGuiStyleDisplay.block);
+	
+	var config_element_change_button_style = new AkGuiStyle()
+		.clone(default_style)
+		.setWidth(MENU_BUTTON_HEIGHT)
+		.setFont(fnt_buttons)
+		.setFontAlign(AkGuiStyleFontAlign.center)
+		.setDisplay(AkGuiStyleDisplay.inline)
+		.setSprite(spr_borders);
+		
+	var config_element_style = new AkGuiStyle()
+		.clone(default_style)
+		.setWidth(MENU_BUTTON_WIDTH / 2)
+		.setFont(fnt_buttons)
+		.setFontAlign(AkGuiStyleFontAlign.center)
+		.setDisplay(AkGuiStyleDisplay.inline);
+	
+	// Complexity
+	config_window.setElement(
+		new AkGuiButton("complexity_title", "Complexity")
+		.setStyles(config_element_title_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("complexity_decrease", "<")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.complexity--;
+			if (settings.complexity < 0) {
+				settings.complexity = 2;
+			}
+		})
+	);
+	config_window.setElement(
+		new AkGuiButton("complexity", "Easy")
+		.setStyles(config_element_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("complexity_increase", ">")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.complexity++;
+			if (settings.complexity > 2) {
+				settings.complexity = 0;
+			}
+		})
+	);
+	
+	// Language
+	config_window.setElement(
+		new AkGuiButton("language_title", "Language")
+		.setStyles(config_element_title_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("language_decrease", "<")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.language--;
+			if (settings.language < 0) {
+				settings.language = 2;
+			}
+		})
+	);
+	config_window.setElement(
+		new AkGuiButton("language", "Easy")
+		.setStyles(config_element_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("language_increase", ">")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.language++;
+			if (settings.language > 2) {
+				settings.language = 0;
+			}
+		})
+	);
+	
+	// Volume
+	config_window.setElement(
+		new AkGuiButton("volume_title", "Volume")
+		.setStyles(config_element_title_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("volume_decrease", "<")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.volume--;
+			if (settings.volume < 0) {
+				settings.volume = 100;
+			}
+		})
+	);
+	config_window.setElement(
+		new AkGuiButton("volume", string(settings.volume))
+		.setStyles(config_element_style)
+	);
+	config_window.setElement(
+		new AkGuiButton("volume_increase", ">")
+		.setStyles(config_element_change_button_style)
+		.onClick(function(){
+			settings.volume++;
+			if (settings.volume > 100) {
+				settings.volume = 0;
+			}
+		})
+	);
+	
+	// Ok button.
+	config_window.setElement(
+		new AkGuiButton("OK")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			config_active = false;
+		})
+	);
+	
+	
+	
+	global.config_window = config_window;
 
 #endregion
 
