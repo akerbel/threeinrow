@@ -9,9 +9,6 @@ if (config_active) {
 		.getElement("complexity")
 		.setText(complexity_levels[settings.complexity]);
 	global.config_window
-		.getElement("language")
-		.setText(languages[settings.language]);
-	global.config_window
 		.getElement("volume")
 		.setText(string(settings.volume));
 	global.config_window.draw();

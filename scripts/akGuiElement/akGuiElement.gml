@@ -60,9 +60,9 @@ function AkGuiElement(_name = "") constructor {
 		/// @desc Draw sprite of the element, if defined.
 		///
 		/// @return {struct.AkGuiElement}
-		static drawSprite = function() {
+		static drawSprite = function(subimg = 0) {
 			if (style.sprite != noone && !self.isHidden()) {
-				draw_sprite_stretched(style.sprite, 0, self.getDrawX(), self.getDrawY(), style.width, style.height);
+				draw_sprite_stretched(style.sprite, subimg, self.getDrawX(), self.getDrawY(), style.width, style.height);
 			}
 			return self;
 		}
@@ -91,6 +91,8 @@ function AkGuiElement(_name = "") constructor {
 		/// @desc "click" event.
 		///
 		/// @context <AkGuiElement>
+		///
+		/// return {bool}
 		static click = function() {
 			var click_x = self.getDrawX();
 			var click_y = self.getDrawY();
@@ -102,7 +104,29 @@ function AkGuiElement(_name = "") constructor {
 				)
 			) {
 				_onClick();
+				return true;
 			}
+			return false;
+		}
+		
+		/// @func clicked()
+		///
+		/// @desc Show that element is clicked. Does not trigger onClick function.
+		///
+		/// return {bool}
+		static clicked = function() {
+			var click_x = self.getDrawX();
+			var click_y = self.getDrawY();
+			if (mouse_check_button(mb_left) && 
+				point_in_rectangle(
+					device_mouse_x_to_gui(0), device_mouse_y_to_gui(0),
+					click_x, click_y,
+					click_x + style.width, click_y + style.height
+				)
+			) {
+				return true;
+			}
+			return false;
 		}
 	
 	#endregion
@@ -127,12 +151,16 @@ function AkGuiElement(_name = "") constructor {
 		/// @func keyPressed()
 		///
 		/// @desc "keyPressed" event.
+		///
+		/// return {bool}
 		static keyPressed = function() {
 			for (var i = 0; i < array_length(_onKeyPressed); i++) {
 				if (keyboard_check_pressed(_onKeyPressed[i].key)) {
 					_onKeyPressed[i].func();
+					return true;
 				}
 			}
+			return false;
 		}
 	
 	#endregion

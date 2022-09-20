@@ -35,6 +35,7 @@ function AkGuiStyle() constructor {
 	font_align = AkGuiStyleFontAlign.left;
 	position = AkGuiStylePositions.absolute;
 	display = AkGuiStyleDisplay.block;
+	click_sound = noone;
 	
 	/// @func setSprite(_asset)
 	///
@@ -43,6 +44,16 @@ function AkGuiStyle() constructor {
 	/// @return {struct.AkGuiStyle}
 	static setSprite = function(_asset) {
 		self._setStyle("sprite", _asset);
+		return self;
+	}
+	
+	/// @func setClickSound(_asset)
+	///
+	/// @param {Asset.GMSound} _asset
+	///
+	/// @return {struct.AkGuiStyle}
+	static setClickSound = function(_asset) {
+		self._setStyle("click_sound", _asset);
 		return self;
 	}
 	

@@ -1,5 +1,5 @@
 /**
- * Merge two arrays into new array.
+ * @func array_merge Merge two arrays into new array.
  *
  * @param {array} ar1
  * @param {array} ar2
@@ -15,4 +15,22 @@ function array_merge(ar1, ar2) {
 		array_push(result, ar2[i]);
 	}
 	return result;
+}
+
+/**
+ * @func in_array
+ *
+ * @param {any} niddle
+ * @param {array} ar
+ *
+ * @return {bool}
+ */
+function in_array(niddle, ar) {
+	for (var i = 0; i < array_length(ar); i++) {
+		if (ar[i] == niddle) {
+			return true;
+		}
+	}
+	
+	return false;
 }

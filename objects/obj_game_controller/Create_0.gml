@@ -39,20 +39,13 @@
 
 settings = {
 	complexity: 1,
-	language: 0,
-	volume: 50,
+	volume: 100,
 }
 
 complexity_levels = [
 	"Easy",
 	"Medium",
 	"Hard",
-];
-
-languages = [
-	"English",
-	"German",
-	"Russian",
 ];
 
 #endregion
@@ -68,7 +61,8 @@ var default_style = new AkGuiStyle()
 	.setMargin(MENU_BUTTON_MARGIN)
 	.setPadding(MENU_BUTTON_PADDING)
 	.setWidth(MENU_BUTTON_WIDTH)
-	.setHeight(MENU_BUTTON_HEIGHT);
+	.setHeight(MENU_BUTTON_HEIGHT)
+	.setClickSound(snd_click);
 
 #region Main menu items
 
@@ -200,36 +194,6 @@ var default_style = new AkGuiStyle()
 		})
 	);
 	
-	// Language
-	config_window.setElement(
-		new AkGuiButton("language_title", "Language")
-		.setStyles(config_element_title_style)
-	);
-	config_window.setElement(
-		new AkGuiButton("language_decrease", "<")
-		.setStyles(config_element_change_button_style)
-		.onClick(function(){
-			settings.language--;
-			if (settings.language < 0) {
-				settings.language = 2;
-			}
-		})
-	);
-	config_window.setElement(
-		new AkGuiButton("language", "Easy")
-		.setStyles(config_element_style)
-	);
-	config_window.setElement(
-		new AkGuiButton("language_increase", ">")
-		.setStyles(config_element_change_button_style)
-		.onClick(function(){
-			settings.language++;
-			if (settings.language > 2) {
-				settings.language = 0;
-			}
-		})
-	);
-	
 	// Volume
 	config_window.setElement(
 		new AkGuiButton("volume_title", "Volume")
@@ -239,10 +203,11 @@ var default_style = new AkGuiStyle()
 		new AkGuiButton("volume_decrease", "<")
 		.setStyles(config_element_change_button_style)
 		.onClick(function(){
-			settings.volume--;
+			settings.volume -= 5;
 			if (settings.volume < 0) {
 				settings.volume = 100;
 			}
+			audio_group_set_gain(audiogroup_default, settings.volume / 100, 0);
 		})
 	);
 	config_window.setElement(
@@ -253,10 +218,11 @@ var default_style = new AkGuiStyle()
 		new AkGuiButton("volume_increase", ">")
 		.setStyles(config_element_change_button_style)
 		.onClick(function(){
-			settings.volume++;
+			settings.volume += 5;
 			if (settings.volume > 100) {
 				settings.volume = 0;
 			}
+			audio_group_set_gain(audiogroup_default, settings.volume / 100, 0);
 		})
 	);
 	
