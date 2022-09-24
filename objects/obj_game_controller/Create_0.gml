@@ -1,5 +1,7 @@
 /// @description
 
+randomize();
+
 #region Constants
 
 #macro GEM_LAYER "Instances"
@@ -28,6 +30,7 @@
 		hor_blow,
 		ver_blow,
 		cros_blow,
+		color_blow,
 		rotate_clockwise,
 		rotate_counterclockwise,
 		amount,
@@ -54,6 +57,7 @@ game_grid = new GameGrid();
 game_grid.init(2);
 menu_active = true;
 config_active = false;
+credits_active = false;
 global.camera_angle = 0;
 global.player_active = false;
 
@@ -77,7 +81,8 @@ var default_style = new AkGuiStyle()
 	var game_over_style = new AkGuiStyle()
 		.clone(default_style)
 		.setFont(fnt_game_over)
-		.setFontAlign(AkGuiStyleFontAlign.center);
+		.setFontAlign(AkGuiStyleFontAlign.center)
+		.setPosition(AkGuiStylePositions.center);
 	var game_over_message = new AkGuiButton("game_over_message", "Game Over")
 		.setStyles(game_over_style)
 		.hide();
@@ -122,6 +127,14 @@ var default_style = new AkGuiStyle()
 		});
 	menu_window.setElement(menu_button);
 	
+	// Credits
+	menu_button = new AkGuiButton("Credits")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			credits_active = true;
+		});
+	menu_window.setElement(menu_button);
+	
 	// Exit
 	menu_button = new AkGuiButton("Exit")
 		.setStyles(menu_button_style)
@@ -163,6 +176,11 @@ var default_style = new AkGuiStyle()
 		.setFont(fnt_buttons)
 		.setFontAlign(AkGuiStyleFontAlign.center)
 		.setDisplay(AkGuiStyleDisplay.inline);
+	
+	config_window.setElement(
+		new AkGuiButton("Settings")
+		.setStyles(game_over_style)
+	);
 	
 	// Complexity
 	config_window.setElement(
@@ -241,13 +259,64 @@ var default_style = new AkGuiStyle()
 
 #endregion
 
+#region Credits
+
+	var credits_window = new AkGuiWindow("credits")
+		.setStyles(new AkGuiStyle().clone(menu_window_style));
+		
+	credits_window.setElement(
+		new AkGuiButton("Credits")
+		.setStyles(game_over_style)
+	);
+	
+	var credits_title_style = new AkGuiStyle()
+		.clone(default_style)
+		.setWidth(MENU_BUTTON_WIDTH)
+		.setFont(fnt_buttons)
+		.setFontAlign(AkGuiStyleFontAlign.center)
+		.setDisplay(AkGuiStyleDisplay.block);
+	
+	credits_window.setElement(
+		new AkGuiButton("Code: AKerbel")
+		.setStyles(credits_title_style)
+		.onClick(function(){
+			url_open("https://github.com/akerbel");
+		})
+	);
+	credits_window.setElement(
+		new AkGuiButton("Graphics: 7soul")
+		.setStyles(credits_title_style)
+		.onClick(function(){
+			url_open("https://7soul1.deviantart.com/");
+		})
+	);
+	credits_window.setElement(
+		new AkGuiButton("Germany 2022")
+		.setStyles(credits_title_style)
+	);
+	
+		
+	// Ok button.
+	credits_window.setElement(
+		new AkGuiButton("OK")
+		.setStyles(menu_button_style)
+		.onClick(function(){
+			credits_active = false;
+		})
+	);
+
+	global.credits_window = credits_window;
+
+#endregion
+
 #region Particles
 
 global.particle_system = part_system_create_layer(PARTICLE_LAYER, true);
 global.particle_types = [];
 
+var p;
 for (var i = 1; i <= GEM_MAX_TYPE; i++) {
-	var p = part_type_create();
+	p = part_type_create();
 
 	part_type_shape(p, pt_shape_spark);
 	part_type_life(p, game_get_speed(gamespeed_fps), game_get_speed(gamespeed_fps));
@@ -256,50 +325,39 @@ for (var i = 1; i <= GEM_MAX_TYPE; i++) {
 	part_type_speed(p, 1, 2, 0.001, 0);
 	part_type_direction(p, 0, 360, 0, 0);
 	part_type_gravity(p, 0.1, 270);
-
-	switch (i) {
-		case 1: part_type_color2(p, c_green, c_white);
-			break;
-		case 2: part_type_color2(p, c_red, c_white);
-			break;
-		case 3: part_type_color2(p, c_blue, c_white);
-			break;
-		case 4: part_type_color2(p, c_purple, c_white);
-			break;
-		case 5: part_type_color2(p, c_orange, c_white);
-			break;
-		case 6: part_type_color2(p, c_yellow, c_white);
-			break;
-		case 7: part_type_color2(p, c_silver, c_white);
-			break;
-		case 8: part_type_color2(p, c_white, c_white);
-			break;
-		default: part_type_color2(p, c_yellow, c_white);
-	}
+	set_particle_color_by_gem_type(p, i);
 	
 	array_push(global.particle_types, p);
 }
 
-#endregion
+p = part_type_create();
+part_type_shape(p, pt_shape_line);
+part_type_life(p, game_get_speed(gamespeed_fps) / 4, game_get_speed(gamespeed_fps) / 4);
+part_type_alpha2(p, 1, 0);
+part_type_size(p, 0.01, 0.1, 0.001, 0);
+part_type_color2(p, c_white, c_white);
+part_type_direction(p, 0, 0, 0, 0);
 
-#region Effects
+global.particle_hor_effect = p;
 
-var eff = [];
-eff[effects.hor_blow] = {
-	sprite: spr_hor_blow,
-}
-eff[effects.ver_blow] = {
-	sprite: spr_ver_blow,
-}
-eff[effects.cros_blow] = {
-	sprite: spr_cros_blow,
-}
-eff[effects.rotate_clockwise] = {
-	sprite: spr_rotate_clockwise,
-}
-eff[effects.rotate_counterclockwise] = {
-	sprite: spr_rotate_counterclockwise,
-}
-global.effects = eff;
+p = part_type_create();
+part_type_shape(p, pt_shape_line);
+part_type_life(p, game_get_speed(gamespeed_fps) / 4, game_get_speed(gamespeed_fps) / 4);
+part_type_alpha2(p, 1, 0);
+part_type_size(p, 0.01, 0.1, 0.001, 0);
+part_type_color2(p, c_white, c_white);
+part_type_orientation(p, 90, 90, 0, 0, 0);
+
+global.particle_ver_effect = p;
+
+p = part_type_create();
+part_type_shape(p, pt_shape_star);
+part_type_life(p, game_get_speed(gamespeed_fps) / 4, game_get_speed(gamespeed_fps) / 4);
+part_type_alpha2(p, 1, 0);
+part_type_size(p, 0.01, 0.1, 0.001, 0);
+part_type_color2(p, c_white, c_white);
+part_type_direction(p, 0, 0, 0, 0);
+
+global.particle_color_effect = p;
 
 #endregion

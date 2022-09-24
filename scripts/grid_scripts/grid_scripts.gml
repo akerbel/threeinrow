@@ -127,14 +127,14 @@ function GameGrid() constructor {
 	}
 	
 	/**
-	 * Click on a cell.
+	 * @func clickGem Click on a cell.
 	 *
 	 * @param {real} mouse_x
 	 * @param {real} mouse_y
 	 *
 	 * @context <GameGrid>
 	 */
-	static click = function(mouse_x, mouse_y) {
+	static clickGem = function(mouse_x, mouse_y) {
 		var clicked = new Coordinate(self.mouseGetX(mouse_x), self.mouseGetY(mouse_y));
 		var chosen = global.chosen_gem;
 		if (self.cellExistsAndIsNotEmpty(clicked)) {
@@ -176,12 +176,13 @@ function GameGrid() constructor {
 		var current_type;
 		var current_coor;
 		
+		// Find gems to destroy.
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
 				current_coor = new Coordinate(i, j);
 				if (self.cellExistsAndIsNotEmpty(current_coor)) {
 					current_type = grid[i][j].type;
-					toDestroy = array_merge( 
+					toDestroy = array_merge(
 						toDestroy,
 						self.findRowOfGems(current_coor, current_type, true)
 					);
@@ -193,15 +194,26 @@ function GameGrid() constructor {
 			}
 		}
 		
+		// Destroy gems.
 		if (array_length(toDestroy) > 0) {
 			result = true;
 			if (destroy) {
+				var specGems = [];
 				for (var i = 0; i < array_length(toDestroy); i++) {
-					if (self.cellExistsAndIsNotEmpty(toDestroy[i])) {
-						self.destroyGem(toDestroy[i]);
+					if (self.cellExistsAndIsNotEmpty(toDestroy[i].coor)) {
+						if (toDestroy[i].effect != effects.none) {
+							array_push(specGems, toDestroy[i]);
+						}
+						self.destroyGem(toDestroy[i].coor);
 					}
 				}
 				audio_play_sound(asset_get_index("snd_destroy_" + string(irandom_range(1, 3))), 1, false);
+				
+				// Recreate gems with special effects.
+				for (var i = 0; i < array_length(specGems); i++) {
+					grid[specGems[i].coor.x][specGems[i].coor.y] = 
+						new Gem(specGems[i].coor.x, specGems[i].coor.y, specGems[i].type, specGems[i].effect);
+				}
 			}
 		}
 		return result;
@@ -215,15 +227,64 @@ function GameGrid() constructor {
 	 * @return void
 	 */
 	static destroyGem = function(coor) {
-		if (grid[coor.x][coor.y].effect == effects.rotate_counterclockwise) {
-			global.camera_angle += 90;
+		if (self.cellExistsAndIsNotEmpty(coor)) {
+		
+			switch (grid[coor.x][coor.y].effect) {
+			
+				case effects.rotate_counterclockwise:
+					global.camera_angle += 90;
+				break;
+			
+				case effects.rotate_clockwise:
+					global.camera_angle -= 90;
+				break;
+			
+				case effects.hor_blow:
+					for (var i = 0; i < width; i++) {
+						if (i != coor.x) {
+							// Avoid cycling
+							if (self.isGemEffect(new Coordinate(i, coor.y), effects.hor_blow)) {
+								grid[i][coor.y].effect = effects.none;
+							}
+							self.destroyGem(new Coordinate(i, coor.y));
+						}
+					}
+				break;
+			
+				case effects.ver_blow:
+					for (var i = 0; i < height; i++) {
+						if (i != coor.y) {
+							// Avoid cycling
+							if (self.isGemEffect(new Coordinate(coor.x, i), effects.ver_blow)) {
+								grid[coor.x][i].effect = effects.none;
+							}
+							self.destroyGem(new Coordinate(coor.x, i));
+						}
+					}
+				break;
+				
+				case effects.color_blow:
+					for (var i = 0; i < width; i++) {
+						for (var j = 0; j < height; j++) {
+							if (i != coor.x && j != coor.y && self.isGemType(new Coordinate(i, j), grid[coor.x][coor.y].type)) {
+								// Avoid cycling
+								if (self.isGemEffect(new Coordinate(i, j), effects.color_blow)) {
+									grid[i][j].effect = effects.none;
+								}
+								self.destroyGem(new Coordinate(i, j));
+							}
+						}
+					}
+				break;
+		
+			}
+		
+			instance_destroy(grid[coor.x][coor.y].instance);
+			grid[coor.x][coor.y] = EMPTY_CELL;
+			global.score += 100;
+		
 		}
-		else if (grid[coor.x][coor.y].effect == effects.rotate_clockwise) {
-			global.camera_angle -= 90;
-		}
-		instance_destroy(grid[coor.x][coor.y].instance);
-		grid[coor.x][coor.y] = EMPTY_CELL;
-		global.score += 100;
+		
 	}
 	
 	/**
@@ -238,24 +299,39 @@ function GameGrid() constructor {
 	 *
 	 * @return {array<struct.Coordinate>}
 	 */
-	static findRowOfGems = function(coor, type, hor = true, down = true) {
+	static findRowOfGems = function(coor, _type, hor = true, down = true) {
 		var result = [];
 		var k = 1;
 		while (self.isGemType(
 			hor ? 
 				new Coordinate(coor.x + k * (down ? 1 : -1), coor.y) : 
 				new Coordinate(coor.x, coor.y + k * (down ? 1 : -1)),
-			type
+			_type
 		)) {
 			k++;
 		}
 		if (k >= ROW_SIZE) {
+			var _coor, _effect;
 			for (var m = 0; m < k; m++) {
+				_coor = hor ?
+					new Coordinate(coor.x + m * (down ? 1 : -1), coor.y) :
+					new Coordinate(coor.x, coor.y + m * (down ? 1 : -1));
+				if ((k == ROW_SIZE + 1) && (m == 1)) {
+					_effect = hor ? effects.hor_blow : effects.ver_blow;
+				}
+				else if ((k == ROW_SIZE + 2) && (m == 2)) {
+					_effect = effects.color_blow;
+				}
+				else {
+					_effect = effects.none;
+				}
 				array_push(
 					result,
-					hor ? 
-						new Coordinate(coor.x + m * (down ? 1 : -1), coor.y) : 
-						new Coordinate(coor.x, coor.y + m * (down ? 1 : -1))
+					{
+						coor: _coor,
+						effect: _effect,
+						type: _type,
+					}
 				);
 			}
 		}
@@ -331,7 +407,23 @@ function GameGrid() constructor {
 	}
 	
 	/**
-	 * Check if the gem is moving.
+	 * @func isGemEffect(coor, effect) Check if cell has gem with effec.
+	 *
+	 * @param {struct.Coordinate} coor
+	 * @param {real} effect
+	 *
+	 * @return {bool}
+	 */
+	static isGemEffect = function(coor, effect) {
+		if (!self.cellExistsAndIsNotEmpty(coor)) {
+			return false;
+		}
+		
+		return grid[coor.x][coor.y].effect == effect;
+	}
+	
+	/**
+	 * @func isGemMoving(coor) Check if the gem is moving.
 	 *
 	 * @param {struct.Coordinate} coor
 	 *

@@ -13,6 +13,9 @@ if (config_active) {
 		.setText(string(settings.volume));
 	global.config_window.draw();
 }
+else if (credits_active) {
+	global.credits_window.draw();
+}
 else if (menu_active) {
 	global.menu_window.draw();
 }

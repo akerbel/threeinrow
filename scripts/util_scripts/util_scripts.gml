@@ -34,3 +34,25 @@ function in_array(niddle, ar) {
 	
 	return false;
 }
+
+function set_particle_color_by_gem_type(p, type) {
+	switch (type) {
+		case 1: part_type_color2(p, c_green, c_white);
+			break;
+		case 2: part_type_color2(p, c_red, c_white);
+			break;
+		case 3: part_type_color2(p, c_blue, c_white);
+			break;
+		case 4: part_type_color2(p, c_purple, c_white);
+			break;
+		case 5: part_type_color2(p, c_orange, c_white);
+			break;
+		case 6: part_type_color2(p, c_yellow, c_white);
+			break;
+		case 7: part_type_color2(p, c_silver, c_white);
+			break;
+		case 8: part_type_color2(p, c_white, c_white);
+			break;
+		default: part_type_color2(p, c_yellow, c_white);
+	}
+}
